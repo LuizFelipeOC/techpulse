@@ -13,7 +13,7 @@ class NetworkManager {
     let url = "https://www.tabnews.com.br/api/v1"
     
     func fetchTabnewsRecentData(for page: Int , completed: @escaping (Result<[News], TPError>) -> Void) {
-        let endpoint = url + "?&page=1&per_page=100&strategy=newContent"
+        let endpoint = url + "?&page=\(page)&per_page=10&strategy=newContent"
         
         guard let url = URL(string: endpoint) else {
         completed(.failure(TPError.invalidURL))
