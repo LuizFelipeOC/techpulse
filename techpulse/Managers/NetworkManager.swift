@@ -7,11 +7,6 @@
 
 import UIKit
 
-
-class News : Codable {
-    
-}
-
 class NetworkManager {
     static let shared = NetworkManager()
     
