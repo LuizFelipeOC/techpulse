@@ -11,6 +11,7 @@ class TPButton: UIButton {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        configureTPButton()
     }
     
     required init?(coder: NSCoder) {
@@ -22,12 +23,10 @@ class TPButton: UIButton {
         
         self.backgroundColor = backgroundColor
         self.setTitle(title, for: .normal)
-        
-        configureTPButton()
     }
     
     private func configureTPButton() {
-        layer.cornerRadius      = 10
+        layer.cornerRadius      = 20
         titleLabel?.textColor   = .white
         titleLabel?.font        = UIFont.preferredFont(forTextStyle: .headline)
         
