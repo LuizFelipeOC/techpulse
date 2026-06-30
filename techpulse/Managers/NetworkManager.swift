@@ -13,7 +13,7 @@ class NetworkManager {
     let url = "https://www.tabnews.com.br/api/v1"
     
     func fetchTabnewsRecentData(for page: Int , completed: @escaping (Result<[News], TPError>) -> Void) {
-        let endpoint = url + "?&page=\(page)&per_page=10&strategy=newContent"
+        let endpoint = url + "/contents?&page=\(page)&per_page=10&strategy=new"
         
         guard let url = URL(string: endpoint) else {
         completed(.failure(TPError.invalidURL))
@@ -44,8 +44,10 @@ class NetworkManager {
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 
                 let news: [News] = try decoder.decode([News].self, from: data!)
+                
                 completed(.success(news))
             } catch {
+                print("Erro de decodificação: \(error)")
                 completed(.failure(.invalidData))
             }
         }
