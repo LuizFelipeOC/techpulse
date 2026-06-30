@@ -7,13 +7,19 @@
 
 import UIKit
 
+enum Strategy: String, Codable {
+    case new
+    case relevant
+    case old
+}
+
 class NetworkManager {
     static let shared = NetworkManager()
     
     let url = "https://www.tabnews.com.br/api/v1"
     
-    func fetchTabnewsRecentData(for page: Int , completed: @escaping (Result<[News], TPError>) -> Void) {
-        let endpoint = url + "/contents?&page=\(page)&per_page=10&strategy=new"
+    func fetchTabnewsData(for page: Int, strategy: Strategy , completed: @escaping (Result<[News], TPError>) -> Void) {
+        let endpoint = url + "/contents?&page=\(page)&per_page=10&strategy=\(strategy.rawValue)"
         
         guard let url = URL(string: endpoint) else {
         completed(.failure(TPError.invalidURL))
