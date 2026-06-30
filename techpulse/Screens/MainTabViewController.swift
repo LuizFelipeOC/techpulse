@@ -19,12 +19,14 @@ class MainTabViewController: UITabBarController {
     
     private func setupTabs() {
             let homeVC = HomeViewController()
+            let relevantNewsVc = RelevantsNewsViewController()
             
-            let homeNavigation = UINavigationController(rootViewController: homeVC)
+            let homeController = UINavigationController(rootViewController: homeVC)
+            let relevantNewsNavController = UINavigationController(rootViewController: relevantNewsVc)
             
-            homeNavigation.tabBarItem = UITabBarItem(title: "Início", image: UIImage(systemName: "house"), tag: 0)
+            homeController.tabBarItem = UITabBarItem(title: "Recentes", image: UIImage(systemName: "house"), tag: 0)
+            relevantNewsNavController.tabBarItem = UITabBarItem(title: "Relevantes", image: UIImage(systemName: "star"), tag: 1)
             
-            setViewControllers([homeNavigation], animated: false)
-        }
-
+            setViewControllers([homeController, relevantNewsNavController], animated: true)
+    }
 }
