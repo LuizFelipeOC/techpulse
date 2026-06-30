@@ -27,7 +27,7 @@ class HomeViewController: UIViewController {
     func getRecentNews(for page: Int = 1) {
         showLoadingView()
         
-        NetworkManager.shared.fetchTabnewsRecentData(for: 1, completed: {
+        NetworkManager.shared.fetchTabnewsData(for: 1, strategy: Strategy.new, completed: {
             [weak self] result in
             
             guard let self = self else { return }
