@@ -28,7 +28,7 @@ class NewsCell: UICollectionViewCell {
     
     func set(News: News) {
         titleLabel.text = News.title
-        usernameLabel.text = "@:\(News.ownerUsername)"
+        usernameLabel.text = "@\(News.ownerUsername)"
     }
     
     
