@@ -9,10 +9,12 @@ import UIKit
 
 class HomeViewController: UIViewController {
     
-    let page: Int = 1
+    var page: Int = 1
     
     var newsList: [News] = []
     var collectionView: UICollectionView!
+    
+    var hasLoadMore: Bool = true
 
 
     override func viewDidLoad() {
@@ -22,11 +24,15 @@ class HomeViewController: UIViewController {
         getRecentNews()
     }
     
-    func getRecentNews() {
-        NetworkManager.shared.fetchTabnewsRecentData(for: 10, completed: {
+    func getRecentNews(for page: Int = 1) {
+        showLoadingView()
+        
+        NetworkManager.shared.fetchTabnewsRecentData(for: 1, completed: {
             [weak self] result in
             
             guard let self = self else { return }
+            
+            self.dimissLoadingView()
             
             switch result {
             case .success(let news):
@@ -102,8 +108,18 @@ extension HomeViewController: UICollectionViewDataSource {
 }
 
 extension HomeViewController: UICollectionViewDelegate {
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) { }
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) { }
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        let offsetY         = scrollView.contentOffset.y
+        let contentHeight   = scrollView.contentSize.height
+        let height          = scrollView.frame.height
+        
+        if offsetY > contentHeight - height {
+            guard hasLoadMore else { return }
+            
+            page += 1
+            getRecentNews(for: page)
+        }
+    }
 }
 
 extension HomeViewController: UISearchResultsUpdating, UISearchBarDelegate {
