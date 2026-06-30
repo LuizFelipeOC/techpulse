@@ -12,10 +12,10 @@ struct News : Codable, Hashable {
     var ownerId: String
     var slug: String
     var title: String
-    var body: String
-    var createdAt: Date
-    var updatedAt: Date
-    var tabCoins: Int
+    var body: String?
+    var createdAt: String
+    var updatedAt: String
+    var tabcoins: Int
     var ownerUsername: String
     var childrenDeepCount: Int
 }

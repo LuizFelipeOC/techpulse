@@ -11,19 +11,20 @@ class MainTabViewController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
+        setupTabs()
+        
+        tabBar.tintColor = .systemMint
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+    private func setupTabs() {
+            let homeVC = HomeViewController()
+            
+            let homeNavigation = UINavigationController(rootViewController: homeVC)
+            
+            homeNavigation.tabBarItem = UITabBarItem(title: "Início", image: UIImage(systemName: "house"), tag: 0)
+            
+            setViewControllers([homeNavigation], animated: false)
+        }
 
 }

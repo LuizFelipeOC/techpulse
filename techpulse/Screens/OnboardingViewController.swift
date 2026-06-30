@@ -98,8 +98,13 @@ class OnboardingViewController: UIViewController {
     
     
     @objc func onboardingButtonTapped() {
-        let home = HomeViewController()
+        let mainTabBar = MainTabViewController()
         
-        navigationController?.setViewControllers([home], animated: true)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+        
+        let window = windowScene.windows.first {
+            window.rootViewController = mainTabBar
+            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+        }
     }
 }
