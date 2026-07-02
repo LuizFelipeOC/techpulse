@@ -22,9 +22,9 @@ class NetworkManager {
         let endpoint = url + "/contents?&page=\(page)&per_page=10&strategy=\(strategy.rawValue)"
         
         guard let url = URL(string: endpoint) else {
-        completed(.failure(TPError.invalidURL))
-
-         return
+            completed(.failure(TPError.invalidURL))
+            
+            return
         }
         
         let task = URLSession.shared.dataTask(with: url) {
@@ -58,6 +58,47 @@ class NetworkManager {
             }
         }
         
+        task.resume()
+    }
+    
+    
+    func getTabnewsContent(for username: String, slug: String, completed: @escaping (Result<News, TPError>) -> Void){
+        let endpoint = url + "/contents/\(username)/\(slug)"
+            
+        guard let  url = URL(string: endpoint) else {
+            completed(.failure(.invalidURL))
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let _ = error {
+                completed(.failure(.invalidResponse))
+                return
+                
+            }
+            
+            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+                completed(.failure(.invalidResponse))
+                return
+            }
+            
+            guard let _ = data else {
+                completed(.failure(.invalidData))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                
+                let news: News = try decoder.decode(News.self, from: data!)
+                completed(.success(news))
+
+            } catch {
+                print("Erro de decodificação: \(error)")
+                completed(.failure(.invalidData))
+            }
+        }
         task.resume()
     }
 }

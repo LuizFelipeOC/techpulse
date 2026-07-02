@@ -115,4 +115,20 @@ extension RelevantsNewsViewController: UICollectionViewDelegate {
             fetchRelevantNews(for: page)
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let activeArray             = newsList
+        let news                    = activeArray[indexPath.item]
+        
+        let newsDetailsVC           = NewsDetailsViewController()
+        
+        newsDetailsVC.userOwner     = news.ownerUsername
+        newsDetailsVC.createdAt     = news.createdAt
+        newsDetailsVC.slug          = news.slug
+        
+        let navigationController    = UINavigationController(rootViewController: newsDetailsVC)
+        
+        present(navigationController, animated: true)
+
+    }
 }

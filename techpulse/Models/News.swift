@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct News : Codable, Hashable {
+
+struct News : Codable, Hashable, Sendable {
     var id: String
     var ownerId: String
     var slug: String

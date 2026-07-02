@@ -35,9 +35,15 @@ extension UIViewController {
     }
     
     func dimissLoadingView() {
-        DispatchQueue.main.sync {
-            containerView.removeFromSuperview()
-            containerView = nil
-        }
+        DispatchQueue.main.async {
+                guard containerView != nil else { return }
+                
+                UIView.animate(withDuration: 0.25, animations: {
+                    containerView.alpha = 0
+                }) { _ in
+                    containerView.removeFromSuperview()
+                    containerView = nil
+                }
+            }
     }
 }
