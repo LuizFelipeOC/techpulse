@@ -10,10 +10,12 @@ import UIKit
 class NewsCell: UICollectionViewCell {
     static let reuseID = "NewsCell"
     
-    private let titleLabel = TPTitle(textAlignment: .left, fontSize: 18)
-    private let usernameLabel = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
+    private let titleLabel          = TPTitle(textAlignment: .left, fontSize: 18)
+    private let usernameLabel       = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
+    private let dateCreatedLabel    = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
     
-    private let containerView = UIView()
+    private let containerView       = UIView()
+    private let headerStackView     = UIStackView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -29,12 +31,19 @@ class NewsCell: UICollectionViewCell {
     func set(News: News) {
         titleLabel.text = News.title
         usernameLabel.text = "@\(News.ownerUsername)"
+        dateCreatedLabel.text = News.createdAt.convertToRelativeTime()
     }
     
     
     private func configureCell() {
         configureContainer()
+        
         configureTitleLabel()
+        configureUsernameLabel()
+        configureDateCreatedLabel()
+        
+        configureStackHeaderView()
+
         layoutConstraints()
     }
     
@@ -46,39 +55,59 @@ class NewsCell: UICollectionViewCell {
         
         containerView.translatesAutoresizingMaskIntoConstraints = false
         
-        contentView.addSubview(containerView)
+        self.contentView.addSubview(containerView)
+    }
+    
+    private func configureStackHeaderView() {
+        headerStackView.axis = .horizontal
+        headerStackView.distribution = .equalSpacing
+        headerStackView.alignment = .center
+        
+        headerStackView.addArrangedSubview(usernameLabel)
+        headerStackView.addArrangedSubview(dateCreatedLabel)
+        
+        headerStackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.containerView.addSubview(headerStackView)
+    }
+    private func configureUsernameLabel() {
+        usernameLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        usernameLabel.textColor = .secondaryLabel
+        usernameLabel.translatesAutoresizingMaskIntoConstraints = false
+        
     }
     
     private func configureTitleLabel() {
-        usernameLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        usernameLabel.textColor = .secondaryLabel
-        
         titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
         titleLabel.textColor = .label
         titleLabel.numberOfLines = 2
         titleLabel.lineBreakMode = .byTruncatingTail
         
-        usernameLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        self.containerView.addSubview(usernameLabel)
         self.containerView.addSubview(titleLabel)
     }
     
+    private func configureDateCreatedLabel() {
+        dateCreatedLabel.font = .systemFont(ofSize: 13, weight: .regular)
+        dateCreatedLabel.textColor = .secondaryLabel
+        dateCreatedLabel.translatesAutoresizingMaskIntoConstraints = false
+    }
+        
     private func layoutConstraints() {
-            NSLayoutConstraint.activate([
-                containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-                
-                usernameLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 14),
-                usernameLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-                usernameLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-                
-                titleLabel.topAnchor.constraint(equalTo: usernameLabel.bottomAnchor, constant: 6),
-                titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-                titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16)
-            ])
-        }
+        NSLayoutConstraint.activate([
+            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            
+            headerStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 14),
+            headerStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            headerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            
+            titleLabel.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 6),
+            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -14)
+        ])
+    }
 }
