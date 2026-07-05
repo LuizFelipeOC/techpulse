@@ -17,13 +17,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let window = UIWindow(windowScene: windowScene)
         
-        let rootVC = OnboardingViewController()
-        let navigation = UINavigationController(rootViewController: rootVC)
-        
-        window.rootViewController = navigation
+        if OnboardingManager.hasSeenOnboarding {
+            let navigation = UINavigationController(rootViewController: HomeViewController())
+            window.rootViewController = navigation
+        } else {
+            let rootVC = OnboardingViewController()
+            let navigation = UINavigationController(rootViewController: rootVC)
+            
+            window.rootViewController = navigation
+        }
         
         self.window = window
-        
         window.makeKeyAndVisible()
     }
 

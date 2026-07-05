@@ -98,6 +98,8 @@ class OnboardingViewController: UIViewController {
     
     
     @objc func onboardingButtonTapped() {
+        OnboardingManager.hasSeenOnboarding = true
+        
         let mainTabBar = MainTabViewController()
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
