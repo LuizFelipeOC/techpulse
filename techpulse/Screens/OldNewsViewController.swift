@@ -121,4 +121,19 @@ extension OldNewsViewController: UICollectionViewDelegate {
             getOldNews(for: page)
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let activeArray     = newsList
+        let newsItem        = activeArray[indexPath.item]
+        
+        let vc              = NewsDetailsViewController()
+        vc.title            = newsItem.title
+        vc.userOwner        = newsItem.ownerUsername
+        vc.slug             = newsItem.slug
+        vc.createdAt        = newsItem.createdAt
+        
+        let navigationController    = UINavigationController(rootViewController: vc)
+        
+        present(navigationController, animated: true)
+    }
 }
