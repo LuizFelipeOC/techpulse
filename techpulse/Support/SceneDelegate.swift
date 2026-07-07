@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         
         if OnboardingManager.hasSeenOnboarding {
-            let navigation = UINavigationController(rootViewController: HomeViewController())
+            let navigation = UINavigationController(rootViewController: MainTabViewController())
             window.rootViewController = navigation
         } else {
             let rootVC = OnboardingViewController()
