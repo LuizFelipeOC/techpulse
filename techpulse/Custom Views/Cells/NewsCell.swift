@@ -13,9 +13,14 @@ class NewsCell: UICollectionViewCell {
     private let titleLabel          = TPTitle(textAlignment: .left, fontSize: 18)
     private let usernameLabel       = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
     private let dateCreatedLabel    = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
+    private let countCommentLabel    = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
+
     
     private let containerView       = UIView()
     private let headerStackView     = UIStackView()
+    private let dateAndCommnetView  = UIStackView()
+    private let countCommentView    = UIStackView()
+    private let commentsIconView    = UIImageView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -27,13 +32,12 @@ class NewsCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     func set(News: News) {
         titleLabel.text = News.title
         usernameLabel.text = "@\(News.ownerUsername)"
         dateCreatedLabel.text = News.createdAt.convertToRelativeTime()
+        countCommentLabel.text = String(News.childrenDeepCount)
     }
-    
     
     private func configureCell() {
         configureContainer()
@@ -43,6 +47,9 @@ class NewsCell: UICollectionViewCell {
         configureDateCreatedLabel()
         
         configureStackHeaderView()
+        
+        configureCountCommentview()
+        configureCreateAndCommentView()
 
         layoutConstraints()
     }
@@ -64,7 +71,7 @@ class NewsCell: UICollectionViewCell {
         headerStackView.alignment = .center
         
         headerStackView.addArrangedSubview(usernameLabel)
-        headerStackView.addArrangedSubview(dateCreatedLabel)
+        headerStackView.addArrangedSubview(dateAndCommnetView)
         
         headerStackView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -74,7 +81,6 @@ class NewsCell: UICollectionViewCell {
         usernameLabel.font = .systemFont(ofSize: 13, weight: .medium)
         usernameLabel.textColor = .secondaryLabel
         usernameLabel.translatesAutoresizingMaskIntoConstraints = false
-        
     }
     
     private func configureTitleLabel() {
@@ -92,7 +98,40 @@ class NewsCell: UICollectionViewCell {
         dateCreatedLabel.textColor = .secondaryLabel
         dateCreatedLabel.translatesAutoresizingMaskIntoConstraints = false
     }
+    
+    private func configureCreateAndCommentView() {
+        dateAndCommnetView.axis                                      = .horizontal
+        dateAndCommnetView.spacing                                   = 12
+        dateAndCommnetView.alignment                                 = .center
         
+        dateAndCommnetView.addArrangedSubview(dateCreatedLabel)
+        dateAndCommnetView.addArrangedSubview(countCommentView)
+        
+        dateAndCommnetView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func configureCountCommentview() {
+        configureCommentView()
+        
+        commentsIconView.image                                      = UIImage(systemName: "message")
+        commentsIconView.tintColor                                  = .secondaryLabel
+        commentsIconView.tintColor.withAlphaComponent(0.5)
+        commentsIconView.contentMode                                = .scaleAspectFit
+        commentsIconView.translatesAutoresizingMaskIntoConstraints  = false
+        
+        
+        countCommentView.spacing                                    = 4
+        countCommentView.addArrangedSubview(commentsIconView)
+        countCommentView.addArrangedSubview(countCommentLabel)
+        countCommentView.translatesAutoresizingMaskIntoConstraints  = false
+    }
+    
+    private func configureCommentView() {
+        countCommentLabel.font                                      = .systemFont(ofSize: 13, weight: .regular)
+        countCommentLabel.textColor                                 = .secondaryLabel
+        countCommentView.translatesAutoresizingMaskIntoConstraints  = false
+    }
+    
     private func layoutConstraints() {
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -107,7 +146,10 @@ class NewsCell: UICollectionViewCell {
             titleLabel.topAnchor.constraint(equalTo: headerStackView.bottomAnchor, constant: 6),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -14)
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -14),
+            
+            commentsIconView.widthAnchor.constraint(equalToConstant: 16),
+            commentsIconView.heightAnchor.constraint(equalToConstant: 16)
         ])
     }
 }
