@@ -83,11 +83,14 @@ class NewsDetailsViewController: UIViewController {
     
     private func configureBarNavigation() {
         let appearance = UINavigationBarAppearance()
-        let button = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissView))
         
-        button.tintColor = .systemMint
+        let leftButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(dismissView))
+        let rightButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(dismissView))
 
-        navigationItem.rightBarButtonItem = button
+        leftButton.tintColor = .systemMint
+
+        navigationItem.leftBarButtonItem = leftButton
+        navigationItem.rightBarButtonItem = rightButton
         
         navigationItem.title = "@\(userOwner ?? "")"
         navigationItem.subtitle = createdAt.convertToRelativeTime()
