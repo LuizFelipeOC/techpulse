@@ -13,7 +13,8 @@ class NewsCell: UICollectionViewCell {
     private let titleLabel          = TPTitle(textAlignment: .left, fontSize: 18)
     private let usernameLabel       = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
     private let dateCreatedLabel    = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
-    private let countCommentLabel    = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
+    private let countCommentLabel   = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
+    private let tabCoinsLabel       = TPSecondaryLabel(textAlignment: .left, fontSize: 18)
 
     
     private let containerView       = UIView()
@@ -21,6 +22,8 @@ class NewsCell: UICollectionViewCell {
     private let dateAndCommnetView  = UIStackView()
     private let countCommentView    = UIStackView()
     private let commentsIconView    = UIImageView()
+    private let tabCoinsStackView   = UIStackView()
+    private let tabcoinsIconView    = UIImageView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -37,6 +40,7 @@ class NewsCell: UICollectionViewCell {
         usernameLabel.text = "@\(News.ownerUsername)"
         dateCreatedLabel.text = News.createdAt.convertToRelativeTime()
         countCommentLabel.text = String(News.childrenDeepCount)
+        tabCoinsLabel.text = String(News.tabcoins)
     }
     
     private func configureCell() {
@@ -50,15 +54,16 @@ class NewsCell: UICollectionViewCell {
         
         configureCountCommentview()
         configureCreateAndCommentView()
+        configureTabcoinsView()
 
         layoutConstraints()
     }
     
     private func configureContainer() {
-        containerView.backgroundColor         = .secondarySystemBackground
-        containerView.layer.cornerRadius      = 12
-        containerView.layer.borderWidth       = 1
-        containerView.layer.borderColor       = UIColor.separator.cgColor
+        containerView.backgroundColor                           = .secondarySystemBackground
+        containerView.layer.cornerRadius                        = 12
+        containerView.layer.borderWidth                         = 1
+        containerView.layer.borderColor                         = UIColor.separator.cgColor
         
         containerView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -66,9 +71,9 @@ class NewsCell: UICollectionViewCell {
     }
     
     private func configureStackHeaderView() {
-        headerStackView.axis = .horizontal
-        headerStackView.distribution = .equalSpacing
-        headerStackView.alignment = .center
+        headerStackView.axis                                    = .horizontal
+        headerStackView.distribution                            = .equalSpacing
+        headerStackView.alignment                               = .center
         
         headerStackView.addArrangedSubview(usernameLabel)
         headerStackView.addArrangedSubview(dateAndCommnetView)
@@ -78,16 +83,16 @@ class NewsCell: UICollectionViewCell {
         self.containerView.addSubview(headerStackView)
     }
     private func configureUsernameLabel() {
-        usernameLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        usernameLabel.textColor = .secondaryLabel
+        usernameLabel.font                                      = .systemFont(ofSize: 13, weight: .medium)
+        usernameLabel.textColor                                 = .secondaryLabel
         usernameLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func configureTitleLabel() {
-        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
-        titleLabel.textColor = .label
-        titleLabel.numberOfLines = 2
-        titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.font                                     = .systemFont(ofSize: 16, weight: .semibold)
+        titleLabel.textColor                                = .label
+        titleLabel.numberOfLines                            = 2
+        titleLabel.lineBreakMode                            = .byTruncatingTail
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.containerView.addSubview(titleLabel)
@@ -101,11 +106,12 @@ class NewsCell: UICollectionViewCell {
     
     private func configureCreateAndCommentView() {
         dateAndCommnetView.axis                                      = .horizontal
-        dateAndCommnetView.spacing                                   = 12
+        dateAndCommnetView.spacing                                   = 8
         dateAndCommnetView.alignment                                 = .center
         
         dateAndCommnetView.addArrangedSubview(dateCreatedLabel)
         dateAndCommnetView.addArrangedSubview(countCommentView)
+        dateAndCommnetView.addArrangedSubview(tabCoinsStackView)
         
         dateAndCommnetView.translatesAutoresizingMaskIntoConstraints = false
     }
@@ -114,13 +120,13 @@ class NewsCell: UICollectionViewCell {
         configureCommentView()
         
         commentsIconView.image                                      = UIImage(systemName: "message")
-        commentsIconView.tintColor                                  = .secondaryLabel
+        commentsIconView.tintColor                                  = .blue
         commentsIconView.tintColor.withAlphaComponent(0.5)
         commentsIconView.contentMode                                = .scaleAspectFit
         commentsIconView.translatesAutoresizingMaskIntoConstraints  = false
         
         
-        countCommentView.spacing                                    = 4
+        countCommentView.spacing                                    = 2
         countCommentView.addArrangedSubview(commentsIconView)
         countCommentView.addArrangedSubview(countCommentLabel)
         countCommentView.translatesAutoresizingMaskIntoConstraints  = false
@@ -130,6 +136,28 @@ class NewsCell: UICollectionViewCell {
         countCommentLabel.font                                      = .systemFont(ofSize: 13, weight: .regular)
         countCommentLabel.textColor                                 = .secondaryLabel
         countCommentView.translatesAutoresizingMaskIntoConstraints  = false
+    }
+    
+    
+    private func configureTabcoinsLabel() {
+        tabCoinsLabel.font                                      = .systemFont(ofSize: 13, weight: .regular)
+        tabCoinsLabel.textColor                                 = .secondaryLabel
+        tabCoinsLabel.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func configureTabcoinsView() {
+        configureTabcoinsLabel()
+        
+        tabcoinsIconView.image                                      = UIImage(systemName: "flame")
+        tabcoinsIconView.tintColor                                  = .systemRed
+        tabcoinsIconView.contentMode                                = .scaleAspectFit
+        tabcoinsIconView.translatesAutoresizingMaskIntoConstraints  = false
+        
+        tabCoinsStackView.translatesAutoresizingMaskIntoConstraints = false
+        tabCoinsStackView.spacing                                   = 2
+        tabCoinsStackView.alignment                                 = .center
+        tabCoinsStackView.addArrangedSubview(tabcoinsIconView)
+        tabCoinsStackView.addArrangedSubview(tabCoinsLabel)
     }
     
     private func layoutConstraints() {
@@ -148,8 +176,11 @@ class NewsCell: UICollectionViewCell {
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -14),
             
-            commentsIconView.widthAnchor.constraint(equalToConstant: 16),
-            commentsIconView.heightAnchor.constraint(equalToConstant: 16)
+            commentsIconView.widthAnchor.constraint(equalToConstant: 14),
+            commentsIconView.heightAnchor.constraint(equalToConstant: 14),
+            
+            tabcoinsIconView.widthAnchor.constraint(equalToConstant: 14),
+            tabcoinsIconView.heightAnchor.constraint(equalToConstant: 14),
         ])
     }
 }
