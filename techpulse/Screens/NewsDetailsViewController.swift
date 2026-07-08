@@ -85,7 +85,7 @@ class NewsDetailsViewController: UIViewController {
         let appearance = UINavigationBarAppearance()
         
         let leftButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(dismissView))
-        let rightButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(dismissView))
+        let rightButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareController))
 
         leftButton.tintColor = .systemMint
 
@@ -128,5 +128,29 @@ class NewsDetailsViewController: UIViewController {
     
     @objc private func dismissView() {
         dismiss(animated: true, completion: nil)
+    }
+    
+    @objc private func shareController() {
+        showLoadingView()
+        
+        let baseUrl  = "https://www.tabnews.com.br/"
+        let text = "Confira essa publicação na pagina oficial da tabnews"
+        
+        guard let slug = slug else { return }
+        guard let userOwner = userOwner else { return }
+        
+        let completeUrl = baseUrl + userOwner.lowercased() + "/" + slug
+
+        DispatchQueue.main.async {
+            self.dimissLoadingView()
+            
+            SharedManager.share(
+                from: self,
+                url: completeUrl,
+                message: text,
+                barButtonItem: self.navigationItem.rightBarButtonItem
+            )
+        }
+    
     }
 }
