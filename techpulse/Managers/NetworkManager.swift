@@ -101,4 +101,38 @@ class NetworkManager {
         }
         task.resume()
     }
+    
+    
+    func getCommentNews(for userId: String, slug: String, completed: @escaping (Result<[CommentsModel], TPError>) -> Void){
+        let endpoint = url + "/contents/\(userId)/\(slug)/childreen"
+        
+        guard let url = URL(string: endpoint) else { return }
+        
+        let task =  URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let error = error {
+                return  completed(.failure(.invalidResponse))
+                
+            }
+            
+            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+               return completed(.failure(.invalidResponse))
+            }
+            
+            guard let _ = data else {
+              return  completed(.failure(.invalidData))
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                
+                let comments = try decoder.decode(CommentsModel.self, from: data!)
+            } catch {
+                print("Erro de decodificação: \(error)")
+                completed(.failure(.invalidData))
+            }
+        }
+        
+        task.resume()
+    }
 }
