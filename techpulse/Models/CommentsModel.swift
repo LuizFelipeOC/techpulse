@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+
+struct CommentsModel: Codable, Hashable, Sendable {
+    var id: String
+    var body: String
+    var createdAt: String
+    var ownerUsername: String
+    var childreen: [CommentsModel]?
+}
