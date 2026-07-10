@@ -109,7 +109,7 @@ class NetworkManager {
         guard let url = URL(string: endpoint) else { return }
         
         let task =  URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let error = error {
+            if let _ = error {
                 return  completed(.failure(.invalidResponse))
                 
             }
@@ -127,6 +127,7 @@ class NetworkManager {
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 
                 let comments = try decoder.decode(CommentsModel.self, from: data!)
+                return completed(.success([comments]))
             } catch {
                 print("Erro de decodificação: \(error)")
                 completed(.failure(.invalidData))
