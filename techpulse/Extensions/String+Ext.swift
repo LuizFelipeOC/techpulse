@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 extension String {
     
@@ -36,5 +37,31 @@ extension String {
             formatter.locale = Locale(identifier: "pt_BR")
             
             return formatter.localizedString(for: date, relativeTo: Date())
+        }
+    
+        func toMarkdownAttributedString(fontSize: CGFloat = 18, textColor: UIColor = .label, completion: @escaping (NSAttributedString) -> Void) {
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+                    var attributedString = try AttributedString(markdown: self, options: options)
+                    
+                    var container = AttributeContainer()
+                    container.font = UIFont.systemFont(ofSize: fontSize, weight: .regular)
+                    container.foregroundColor = textColor
+                    attributedString.mergeAttributes(container, mergePolicy: .keepCurrent)
+                    
+                    let finalString = NSAttributedString(attributedString)
+                    
+                    DispatchQueue.main.async {
+                        completion(finalString)
+                    }
+                } catch {
+                    print("Erro ao renderizar Markdown: \(error)")
+                    let fallbackString = NSAttributedString(string: self)
+                    DispatchQueue.main.async {
+                        completion(fallbackString)
+                    }
+                }
+            }
         }
 }

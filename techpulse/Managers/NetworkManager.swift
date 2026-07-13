@@ -104,7 +104,7 @@ class NetworkManager {
     
     
     func getCommentNews(for userId: String, slug: String, completed: @escaping (Result<[CommentsModel], TPError>) -> Void){
-        let endpoint = url + "/contents/\(userId)/\(slug)/childreen"
+        let endpoint = url + "/contents/\(userId)/\(slug)/children"
         
         guard let url = URL(string: endpoint) else { return }
         
@@ -126,8 +126,8 @@ class NetworkManager {
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 
-                let comments = try decoder.decode(CommentsModel.self, from: data!)
-                return completed(.success([comments]))
+                let comments = try decoder.decode([CommentsModel].self, from: data!)
+                return completed(.success(comments))
             } catch {
                 print("Erro de decodificação: \(error)")
                 completed(.failure(.invalidData))

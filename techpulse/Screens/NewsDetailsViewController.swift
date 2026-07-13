@@ -13,96 +13,98 @@ class NewsDetailsViewController: UIViewController {
     var createdAt: String!
     var slug: String!
     
-    var body: String = ""
+    var body: String                = ""
     
     var news: News?
+    var comments: [CommentsModel]   = []
     
-    let bodytext = UITextView()
+    let bodytext                    = UITextView()
+    private let tableView           = UITableView(frame: .zero, style: .plain)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getScreenData()
-
         configure()
+        getScreenData()
     }
     
     private func configure() {
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         
         configureBarNavigation()
-        configureBody()
+        setupTableView()
     }
-    
     
     private func getScreenData() {
         showLoadingView()
         
         let group = DispatchGroup()
         
-        group.enter()
-        
+
         getNewsDetails(inside: group)
         getAllComments(inside: group)
         
         group.notify(queue: .main) { [weak self] in
-                self?.dimissLoadingView()
+            guard let self = self else { return }
+            
+            self.dimissLoadingView()
+            self.tableView.reloadData()
+            self.updateHeaderViewHeight()
         }
     }
     
     private func getNewsDetails(inside group: DispatchGroup) {
-        NetworkManager.shared.getTabnewsContent(for: userOwner, slug: slug, completed: {
-            [weak self] result in
+        group.enter()
+        
+        NetworkManager.shared.getTabnewsContent(for: userOwner, slug: slug) { [weak self] result in
+            defer { group.leave() }
+            guard let self = self else { return }
             
-            guard let self = self else { return}
-            
-            switch(result) {
+            switch result {
             case .success(let news):
                 self.news = news
                 let markdownString = news.body ?? ""
                 
-                DispatchQueue.global(qos: .userInitiated).async {
-                    do {
-                        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-                        var attributedString = try AttributedString(markdown: markdownString, options: options)
-                        
-                        var container = AttributeContainer()
-                        container.font = UIFont.systemFont(ofSize: 18, weight: .regular)
-                        container.foregroundColor = UIColor.label
-                        
-                        attributedString.mergeAttributes(container, mergePolicy: .keepCurrent)
-                        
-                        let finalAttributedString = NSAttributedString(attributedString)
-                        
-                        DispatchQueue.main.async {
-                            self.bodytext.attributedText = finalAttributedString
-                        }
-                    } catch {
-                        print("Erro ao renderizar Markdown: \(error)")
-                        DispatchQueue.main.async {
-                            self.bodytext.text = markdownString
-                        }
-                    }
+                markdownString.toMarkdownAttributedString { [weak self] formattedText in
+                    self?.bodytext.attributedText = formattedText
+                    self?.updateHeaderViewHeight()
                 }
                 
-            case .failure(_):
-                self.dimissLoadingView()
+            case .failure(let error):
+                print("Erro detalhes: \(error)")
             }
-        })
+        }
     }
     
     private func getAllComments(inside group: DispatchGroup) {
-        NetworkManager.shared.getTabnewsContent(for: userOwner, slug: slug, completed: {
-            [weak self] result in
-            
-            guard let self else { return  }
+        group.enter()
+        
+        NetworkManager.shared.getCommentNews(for: userOwner, slug: slug) { [weak self] result in
+            defer { group.leave() }
+            guard let self = self else { return }
             
             switch result {
-            case .success(let comments):
-                print(comments)
+            case .success(let nestedComments):
+                self.comments = self.flattenComments(nestedComments, currentDepth: 0)
             case .failure(let error):
-                print(error)
+                print("Erro comentários: \(error)")
             }
-        })
+        }
+    }
+    
+    private func flattenComments(_ nestedComments: [CommentsModel], currentDepth: Int) -> [CommentsModel] {
+        var flatList: [CommentsModel] = []
+        
+        for var comment in nestedComments {
+            comment.depth = currentDepth
+            flatList.append(comment)
+            
+            if !comment.children.isEmpty {
+                let flatChildren = flattenComments(comment.children, currentDepth: currentDepth + 1)
+                flatList.append(contentsOf: flatChildren)
+            }
+        }
+        
+        return flatList
     }
     
     private func configureBarNavigation() {
@@ -134,22 +136,66 @@ class NewsDetailsViewController: UIViewController {
         navigationItem.largeTitleDisplayMode = .always
     }
     
-    func configureBody() {
-        view.addSubview(bodytext)
+    private func setupTableView() {
+        view.addSubview(tableView)
+        tableView.delegate = self
+        tableView.dataSource = self
         
-        bodytext.isEditable = false
-        bodytext.isScrollEnabled = true
-        bodytext.textContainer.lineFragmentPadding = 0
-        bodytext.translatesAutoresizingMaskIntoConstraints = false
-            
+        tableView.isScrollEnabled = true
+        tableView.alwaysBounceVertical = true
+        
+        tableView.separatorStyle = .singleLine
+        tableView.register(CommentCell.self, forCellReuseIdentifier: CommentCell.reuseID)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 120
+        
         NSLayoutConstraint.activate([
-            bodytext.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            bodytext.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            bodytext.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            bodytext.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        setupTableHeader()
     }
     
+    private func setupTableHeader() {
+        bodytext.isEditable = false
+        bodytext.isScrollEnabled = false
+        bodytext.textContainer.lineFragmentPadding = 0
+        bodytext.font = .systemFont(ofSize: 18)
+        
+        let headerContainer = UIView()
+        headerContainer.addSubview(bodytext)
+        bodytext.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            bodytext.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 16),
+            bodytext.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 16),
+            bodytext.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -16),
+            bodytext.bottomAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: -16)
+        ])
+        
+        headerContainer.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 100)
+        tableView.tableHeaderView = headerContainer
+    }
+    
+    private func updateHeaderViewHeight() {
+        guard let headerView = tableView.tableHeaderView else { return }
+        
+        let targetSize = CGSize(width: tableView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let size = headerView.systemLayoutSizeFitting(targetSize, withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
+        
+        if headerView.frame.size.height != size.height {
+            headerView.frame.size.height = size.height
+            
+            tableView.beginUpdates()
+            tableView.tableHeaderView = headerView
+            tableView.endUpdates()
+        }
+    }
     @objc private func dismissView() {
         dismiss(animated: true, completion: nil)
     }
@@ -175,6 +221,26 @@ class NewsDetailsViewController: UIViewController {
                 barButtonItem: self.navigationItem.rightBarButtonItem
             )
         }
+    }
+}
+
+extension NewsDetailsViewController: UITableViewDelegate, UITableViewDataSource {
     
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return comments.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: CommentCell.reuseID, for: indexPath) as? CommentCell else {
+            return UITableViewCell()
+        }
+        
+        let comment = comments[indexPath.row]
+        cell.set(comment: comment)
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return comments.isEmpty ? nil : "Comentários"
     }
 }
