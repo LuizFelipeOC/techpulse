@@ -21,7 +21,7 @@ class NewsDetailsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getNewsData()
+        getScreenData()
 
         configure()
     }
@@ -33,17 +33,21 @@ class NewsDetailsViewController: UIViewController {
         configureBody()
     }
     
-    private func getNewsData() {
+    
+    private func getScreenData() {
         showLoadingView()
+        
+        let group = DispatchGroup()
+        
+        group.enter()
         
         NetworkManager.shared.getTabnewsContent(for: userOwner, slug: slug, completed: {
             [weak self] result in
             
-            
-            guard let self = self else { return }
+            guard let self = self else { return  group.leave()}
             
             switch(result) {
-                case .success(let news):
+            case .success(let news):
                 self.news = news
                 let markdownString = news.body ?? ""
                 
@@ -62,23 +66,47 @@ class NewsDetailsViewController: UIViewController {
                         
                         DispatchQueue.main.async {
                             self.bodytext.attributedText = finalAttributedString
+                            group.leave()
                         }
-                        
-                        
                     } catch {
                         print("Erro ao renderizar Markdown: \(error)")
                         DispatchQueue.main.async {
                             self.bodytext.text = markdownString
                             self.dimissLoadingView()
+                            group.leave()
                         }
                     }
                 }
                 
-                case .failure(let error):
-                print(error)
+            case .failure(_):
                 self.dimissLoadingView()
+                group.leave()
             }
         })
+        
+        group.enter()
+        
+        NetworkManager.shared.getTabnewsContent(for: userOwner, slug: slug, completed: {
+            [weak self] result in
+            
+            guard let self else { return group.leave() }
+            
+            switch result {
+            case .success(let comments):
+                print(comments)
+                
+                group.leave()
+            case .failure(let error):
+                group.leave()
+                print(error)
+            }
+        })
+        
+            group.notify(queue: .main) { [weak self] in
+                guard let self = self else { return }
+                
+                self.dimissLoadingView()
+            }
     }
     
     private func configureBarNavigation() {
