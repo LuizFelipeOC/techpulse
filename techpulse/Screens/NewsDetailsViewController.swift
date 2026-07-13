@@ -41,10 +41,19 @@ class NewsDetailsViewController: UIViewController {
         
         group.enter()
         
+        getNewsDetails(inside: group)
+        getAllComments(inside: group)
+        
+        group.notify(queue: .main) { [weak self] in
+                self?.dimissLoadingView()
+        }
+    }
+    
+    private func getNewsDetails(inside group: DispatchGroup) {
         NetworkManager.shared.getTabnewsContent(for: userOwner, slug: slug, completed: {
             [weak self] result in
             
-            guard let self = self else { return  group.leave()}
+            guard let self = self else { return}
             
             switch(result) {
             case .success(let news):
@@ -66,47 +75,34 @@ class NewsDetailsViewController: UIViewController {
                         
                         DispatchQueue.main.async {
                             self.bodytext.attributedText = finalAttributedString
-                            group.leave()
                         }
                     } catch {
                         print("Erro ao renderizar Markdown: \(error)")
                         DispatchQueue.main.async {
                             self.bodytext.text = markdownString
-                            self.dimissLoadingView()
-                            group.leave()
                         }
                     }
                 }
                 
             case .failure(_):
                 self.dimissLoadingView()
-                group.leave()
             }
         })
-        
-        group.enter()
-        
+    }
+    
+    private func getAllComments(inside group: DispatchGroup) {
         NetworkManager.shared.getTabnewsContent(for: userOwner, slug: slug, completed: {
             [weak self] result in
             
-            guard let self else { return group.leave() }
+            guard let self else { return  }
             
             switch result {
             case .success(let comments):
                 print(comments)
-                
-                group.leave()
             case .failure(let error):
-                group.leave()
                 print(error)
             }
         })
-        
-            group.notify(queue: .main) { [weak self] in
-                guard let self = self else { return }
-                
-                self.dimissLoadingView()
-            }
     }
     
     private func configureBarNavigation() {
